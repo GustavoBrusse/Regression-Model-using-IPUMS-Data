@@ -1,0 +1,184 @@
+dados1<-read.csv("BANCO_2010.csv", header=TRUE, sep=';')
+dados<-dados1[sample(nrow(dados1),10000),]
+
+dados$ï..URBAN<-as.factor(dados$ï..URBAN)
+dados$AGE2<-as.factor(dados$AGE2)
+dados$SEX<-as.factor(dados$SEX)
+dados$MARST<-as.factor(dados$MARST)
+dados$RACE<-as.factor(dados$RACE)
+dados$EDATTAIN<-as.factor(dados$EDATTAIN)
+dados$EMPSTAT<-as.factor(dados$EMPSTAT)
+dados$DISABLED<-as.factor(dados$DISABLED)
+dados$DISBLND<-as.factor(dados$DISBLND)
+dados$DISDEAF<-as.factor(dados$DISDEAF)
+dados$DISLOWR<-as.factor(dados$DISLOWR)
+dados$DISMNTL<-as.factor(dados$DISMNTL)
+dados$arranjo<-as.factor(dados$arranjo)
+dados$RENDA<-as.factor(dados$RENDA)
+
+dados$ï..URBAN<-factor(dados$ï..URBAN, lev=1:2, lab=c ("Rural","Urbano"))
+dados$AGE2<-factor(dados$AGE2, lev=17:20, lab=c ("65 a 69 anos","70 a 74 anos", "75 a 79 anos", "80 anos ou mais"))
+dados$RACE<-factor(dados$RACE, lab=c ("Branca","Preta","Indigena", "Amarela", "Parda"))
+dados$SEX<-factor(dados$SEX, lev=1:2, lab=c ("Masculino","Feminino"))
+dados$MARST<-factor(dados$MARST, lev=1:4, lab=c ("Solteiro(a)","Casado(a)/Em união","Separado(a) ou Divorciado(a)", "Viúvo(a)"))
+dados$EDATTAIN<-factor(dados$EDATTAIN, lev=1:4, lab=c ("Primário incompleto","Primário completo","Secundário completo","Superior completo"))
+dados$EMPSTAT<-factor(dados$EMPSTAT, lev=1:3, lab=c ("Empregado(a)","Desempregado(a)", "Inativo"))
+dados$DISABLED<-factor(dados$DISABLED, lev=1:2, lab=c ("Sim","Não"))
+dados$DISBLND<-factor(dados$DISBLND, lev=1:2, lab=c ("Sim","Não"))
+dados$DISDEAF<-factor(dados$DISDEAF, lev=1:2, lab=c ("Sim","Não"))
+dados$DISLOWR<-factor(dados$DISLOWR, lev=1:2, lab=c ("Sim","Não"))
+dados$DISMNTL<-factor(dados$DISMNTL, lev=1:2, lab=c ("Sim","Não"))
+dados$arranjo<-factor(dados$arranjo, lev=0:1, lab=c ("Reside acompanhado(a)", "Reside Sozinho(a)"))
+dados$RENDA<-factor(dados$RENDA, lev=1:3, lab=c ("1º Quartil de renda","2º Quartil de renda", "4º Quartil de renda"))
+
+dados$cor[dados$RACE=="Branca"] <- "1"
+dados$cor[dados$RACE=="Preta"] <- "2"
+dados$cor[dados$RACE=="Indigena"] <- "2"
+dados$cor[dados$RACE=="Amarela"] <- "1"
+dados$cor[dados$RACE=="Parda"] <- "2"
+
+dados$emprego[dados$EMPSTAT=="Empregado(a)"] <- "2"
+dados$emprego[dados$EMPSTAT=="Desempregado(a)"] <- "2"
+dados$emprego[dados$EMPSTAT=="Inativo"] <- "1"
+
+dados$cor<-factor(dados$cor, lev=1:2, lab=c ("Branca","Não Branca"))
+dados$emprego<-factor(dados$emprego, lev=1:2, lab=c ("Ativo","Inativo"))
+
+Estatísticas descritivas - tabelas de contigência / teste qui-quadrado
+
+
+*****************************************
+prop= function(x,y,linha=T){
+ 
+aux = table(x,y)
+n = 0
+aux2 = aux
+ 
+if (linha==T){
+N = dim(aux)[1]
+for (i in 1:N) {
+n[i] = sum(aux[i,])
+aux2[i,] = aux[i,]/n[i]}
+ } else {
+ N = dim(aux)[2]
+ for (i in 1:N) {
+ n[i] = sum(aux[,i])
+ aux2[,i] = aux[,i]/n[i]}}
+ aux2
+ }
+****************************************
+#QUI-QUADRADO
+
+summary(dados$ï..URBAN)
+summary(dados$cor)
+summary(dados$AGE2)
+summary(dados$SEX)
+summary(dados$MARST)
+summary(dados$EDATTAIN)
+summary(dados$DISABLED)
+summary(dados$DISDEAF)
+summary(dados$DISLOWR)
+summary(dados$DISMNTL)
+summary(dados$RENDA)
+
+prop(dados$ï..URBAN,dados$arranjo)
+chisq.test(dados$ï..URBAN,dados$arranjo)
+
+prop(dados$AGE2,dados$arranjo)
+chisq.test(dados$AGE2,dados$arranjo)
+
+prop(dados$SEX,dados$arranjo)
+chisq.test(dados$SEX,dados$arranjo)
+
+prop(dados$MARST,dados$arranjo)
+chisq.test(dados$MARST,dados$arranjo)
+
+prop(dados$RACE,dados$arranjo)
+chisq.test(dados$RACE,dados$arranjo)
+
+prop(dados$EDATTAIN,dados$arranjo)
+chisq.test(dados$EDATTAIN,dados$arranjo)
+
+prop(dados$EMPSTAT,dados$arranjo)
+chisq.test(dados$EMPSTAT,dados$arranjo)
+
+prop(dados$DISABLED,dados$arranjo)
+chisq.test(dados$DISABLED,dados$arranjo)
+
+prop(dados$DISDEAF,dados$arranjo)
+chisq.test(dados$DISDEAF,dados$arranjo)
+
+prop(dados$DISLOWR,dados$arranjo)
+chisq.test(dados$DISLOWR,dados$arranjo)
+
+prop(dados$DISMNTL,dados$arranjo)
+chisq.test(dados$DISMNTL,dados$arranjo)
+
+prop(dados$RENDA,dados$arranjo)
+chisq.test(dados$RENDA,dados$arranjo)
+
+Vemos pelos testes de qui-quadrado que URBAN e EMPSTAT não são significativos
+vamos aplicar o modelo nulo para cada variável
+****************************************
+
+MODELO
+
+mod1 <- glm(arranjo ~ ï..URBAN, family= binomial, data = dados)
+summary(modelo1)
+mod2 <- glm(arranjo ~ AGE2,family= binomial, data = dados)
+summary(modelo1)
+mod3 <- glm(arranjo ~ SEX,family= binomial, data = dados)
+summary(modelo1)
+mod4 <- glm(arranjo ~ RACE,family= binomial, data = dados)
+summary(modelo1)
+mod5 <- glm(arranjo ~ EDATTAIN,family= binomial, data = dados)
+summary(modelo1)
+mod6 <- glm(arranjo ~ EMPSTAT,family= binomial, data = dados)
+summary(modelo1)
+mod7 <- glm(arranjo ~ DISABLED,family= binomial, data = dados)
+summary(modelo1)
+mod8 <- glm(arranjo ~ DISDEAF,family= binomial, data = dados)
+summary(modelo1)
+mod9 <- glm(arranjo ~ DISLOWR,family= binomial, data = dados)
+summary(modelo1)
+mod10 <- glm(arranjo ~ DISMNTL,family= binomial, data = dados)
+summary(modelo1)
+mod11 <- glm(arranjo ~ RENDA,family= binomial, data = dados)
+summary(modelo1)
+
+modelo2<-glm(arranjo ~ AGE2+SEX+MARST+cor+EDATTAIN+emprego+RENDA+DISABLED, family= binomial, data = dados)
+summary(modelo2)
+
+exp(coefficients(modelo2))
+
+anova(modelo1, modelo3, test = "Chisq")
+
+****************************************
+RESÌDUOS
+
+res <- rstandard(modelo1, type = "deviance")
+
+# Para identificar pontos fora do intervalo -2 e 2 utilize a função identify() e clique com o botão esquerdo do mouse para 
+identificar em que linha se encontra aquela observação e com o botão direito quanto terminar a identificação:
+
+identify(res)
+
+source("glmfunc.r")
+
+# Agora você pode utilizar a função envelope(). Esta função só pode ser utilizada para variável resposta dicotômica e contagem (Poisson). 
+Devido as simulações envolvidas para criar os intervalos, a execução deste comando pode demorar um pouquinho.
+
+qqnorm(res)
+qqline(res)
+envelope(modelo1)
+
+# E quanto aos pontos infuentes? Fazendo o gráfico do leverage.
+
+h <- hatvalues(bp1)
+p <- dim(model.matrix(bp1))[[2]]
+n <- dim(model.matrix(bp1))[[1]]
+
+************************************************
+
+
+
